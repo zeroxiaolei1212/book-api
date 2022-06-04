@@ -83,6 +83,8 @@ def run_migrations_online():
             connection=connection,
             target_metadata=target_metadata,
             process_revision_directives=process_revision_directives,
+            compare_type=True,  # 检查字段类型
+            compare_server_default=True,  # 比较默认值
             **current_app.extensions['migrate'].configure_args
         )
 
