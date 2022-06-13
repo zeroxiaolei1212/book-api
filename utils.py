@@ -13,6 +13,7 @@ def create_token(uid):
     #第二个参数是有效期(秒)
     s = Serializer(current_app.config["SECRET_KEY"],expires_in=3600)
     #接收用户id转换与编码
+    # json.dumps 用于将 Python 对象编码成 JSON 字符串。
     token = s.dumps({"id":uid}).decode("ascii")
     return token
 
@@ -35,3 +36,9 @@ def login_required(view_func):
         return view_func(*args,**kwargs)
 
     return verify_token
+
+def get_id_to_token():
+    token = request.headers["z-token"]
+    s = Serializer(current_app.config["SECRET_KEY"])
+    res = s.loads(token)
+    return res["id"]

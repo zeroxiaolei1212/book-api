@@ -40,3 +40,12 @@ class UserModel(db.Model):
     @classmethod
     def find_by_id(cls, id):
         return cls.query.filter_by(id = id).first()
+    
+    @classmethod
+    def update_by_userinfo(cls, id, email, nickname, birthday, avatar):
+        user = cls.query.filter_by(id = id).first()
+        user.email = email
+        user.nickname = nickname
+        user.birthday = birthday
+        user.avatar = avatar
+        db.session.commit()

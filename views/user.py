@@ -3,7 +3,7 @@ import re
 
 from config import Config
 from models.user import UserModel
-from utils import create_token, login_required
+from utils import create_token, login_required, get_id_to_token
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
@@ -119,3 +119,51 @@ class UserInfo(Resource):
             'avatar': user.avatar,
         }
         return {"data":data}
+
+class UserUpdateInfo(Resource):
+    
+    parser = reqparse.RequestParser()
+    parser.add_argument('email',
+                        type=str,
+                        required=True,
+                        help="This field cannot be blank."
+                        )
+    parser.add_argument('nickname',
+                        type=str,
+                        required=True,
+                        help="This field cannot be blank."
+                        )
+    parser.add_argument('birthday',
+                        type=str,
+                        required=True,
+                        help="This field cannot be blank."
+                        )
+    parser.add_argument('avatar',
+                        type=str,
+                        required=True,
+                        help="This field cannot be blank."
+                        )
+    
+    @login_required
+    def put(self):
+        email_rex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+        data = UserUpdateInfo.parser.parse_args()
+        email=data['email']
+        nickname=data['nickname']
+        birthday=data['birthday']
+        avatar=data['avatar']
+        uid = get_id_to_token()
+        
+        has_email = UserModel.find_by_email(email)
+        
+        if has_email is not None:
+            return {"message": "same email exists"}, 202
+
+        if len(nickname)<2 or len(nickname)>32:
+            return {"message": "nickname must be between 6 and 32 digits"}, 202
+
+        if not re.match(email_rex, email):
+            return {"message": "Email format error"},
+        
+        UserModel.update_by_userinfo(id=uid, email=email, nickname=nickname, birthday=birthday, avatar=avatar)
+        return {"message":"User update successfully."}
